@@ -301,8 +301,12 @@ function createCard(person) {
 }
 
 function getPhotoSrc(person) {
-  if (person.photo_url) return person.photo_url;
-  return null;
+  const url = (person.photo_url || '').trim();
+  if (!url) return null;
+  // If it's a full URL, use it directly
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  // Otherwise treat as a local filename in assets/possibilitators/
+  return 'assets/possibilitators/' + url;
 }
 
 function getInitials(name) {
