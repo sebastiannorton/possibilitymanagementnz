@@ -302,9 +302,10 @@ function createCard(person) {
 function getPhotoSrc(person) {
   const url = (person.photo_url || '').trim();
   if (!url) return null;
-  // Must be a full URL (direct image link, e.g. from Google Drive or Substack)
+  // If it's a full URL, use it directly
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  return null;
+  // Otherwise treat as a local filename in assets/possibilitators/
+  return 'assets/possibilitators/' + url;
 }
 
 function getInitials(name) {
