@@ -13,9 +13,8 @@
  *    No code changes needed.
  * 
  * ── PHOTO PRIORITY ───────────────────────────────────
- * 1. photo_url column (direct URL)
- * 2. assets/possibilitators/{photo_filename} (local file)
- * 3. Auto-generated initials avatar
+ * 1. photo_url column (direct URL, e.g. Google Drive or Substack image)
+ * 2. Auto-generated initials avatar (fallback)
  * 
  * ── EXPECTED COLUMNS ─────────────────────────────────
  * id, name, photo_url, writing_url, platform, rss_url, short_bio, location, active, notes_internal
@@ -303,10 +302,9 @@ function createCard(person) {
 function getPhotoSrc(person) {
   const url = (person.photo_url || '').trim();
   if (!url) return null;
-  // If it's a full URL, use it directly
+  // Must be a full URL (direct image link, e.g. from Google Drive or Substack)
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  // Otherwise treat as a local filename in assets/possibilitators/
-  return 'assets/possibilitators/' + url;
+  return null;
 }
 
 function getInitials(name) {
@@ -362,7 +360,7 @@ async function fetchRSS(person) {
 
 async function tryFetchRSS(rssUrl) {
   // Always fetch via Netlify CORS proxy to avoid CORS issues
-  const proxiedUrl = '/cors-proxy/' + encodeURIComponent(rssUrl);
+  const proxiedUrl = '/.netlify/functions/cors-proxy?url=' + encodeURIComponent(rssUrl);
   try {
     const item = await parseRSS(proxiedUrl);
     if (item) return item;

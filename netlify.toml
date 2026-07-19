@@ -1,3 +1,9 @@
+# Netlify configuration
+# ======================
+
+[build]
+  functions = "netlify/functions"
+
 # Netlify redirects / proxy rules
 # ================================
 # 
@@ -17,19 +23,11 @@
   force = true
 
 [[redirects]]
-  from = "/cors-proxy/*"
-  to = ":splat"
-  status = 200
-  force = true
-
-# PM Events (Homepage) — Tab "PM Events" in "PMNZ Website Events"
-[[redirects]]
   from = "/api/pm-events.csv"
   to = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSU4q-qJs3v_sIzd3uQDjhwigwgd4fJmdJTAM1QsP2z-0td3DnYqD2XYzk6p-Dw2wgXtTYawllOV-Nu/pub?gid=477270608&single=true&output=csv"
   status = 200
   force = true
 
-# Village Events (Noticeboard) — Tab "Village Events" in "PMNZ Website Events"
 [[redirects]]
   from = "/api/village-events.csv"
   to = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSU4q-qJs3v_sIzd3uQDjhwigwgd4fJmdJTAM1QsP2z-0td3DnYqD2XYzk6p-Dw2wgXtTYawllOV-Nu/pub?gid=1323395816&single=true&output=csv"
