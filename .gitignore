@@ -1,0 +1,8 @@
+# Local Netlify folder
+.netlify
+
+# macOS
+.DS_Store
+
+# Strikingly backup (not part of the site)
+pminnz.mystrikingly.com/

@@ -1,0 +1,37 @@
+# Netlify redirects / proxy rules
+# ================================
+# 
+# /api/possibilitators.csv is proxied to the published Google Sheet CSV.
+# This avoids CORS issues — the browser sees a same-origin request.
+#
+# /cors-proxy/* is a generic CORS proxy for any URL (e.g. RSS feeds).
+# The browser requests /cors-proxy/{encodedURL} and Netlify fetches it.
+#
+# To change the Google Sheet data source, update the 'to' URL below.
+# The Google Sheet to edit: https://docs.google.com/spreadsheets/d/1KNXcr4MWsAP7KWf2e0aJ6G9VPWpI-4py9JilHhVdyz4/edit?usp=sharing
+
+[[redirects]]
+  from = "/api/possibilitators.csv"
+  to = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTW3w2MORiW0KEFA-kLNqUNALN9VoBHGFZOg6O1Ss89TmqTtNF6xsLjweTEjrn1ejN9EPXiP4HPhvAX/pub?gid=0&single=true&output=csv"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/cors-proxy/*"
+  to = ":splat"
+  status = 200
+  force = true
+
+# PM Events (Homepage) — Tab "PM Events" in "PMNZ Website Events"
+[[redirects]]
+  from = "/api/pm-events.csv"
+  to = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSU4q-qJs3v_sIzd3uQDjhwigwgd4fJmdJTAM1QsP2z-0td3DnYqD2XYzk6p-Dw2wgXtTYawllOV-Nu/pub?gid=477270608&single=true&output=csv"
+  status = 200
+  force = true
+
+# Village Events (Noticeboard) — Tab "Village Events" in "PMNZ Website Events"
+[[redirects]]
+  from = "/api/village-events.csv"
+  to = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSU4q-qJs3v_sIzd3uQDjhwigwgd4fJmdJTAM1QsP2z-0td3DnYqD2XYzk6p-Dw2wgXtTYawllOV-Nu/pub?gid=1323395816&single=true&output=csv"
+  status = 200
+  force = true
