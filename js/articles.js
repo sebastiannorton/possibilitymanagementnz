@@ -13,7 +13,8 @@
  *    No code changes needed.
  * 
  * ── PHOTO PRIORITY ───────────────────────────────────
- * 1. photo_url column (direct URL, e.g. Google Drive or Substack image)
+ * 1. photo_url column — full URL (e.g. Google Drive / Substack image) OR
+ *    bare filename (e.g. "AnneChloe.png" → looks in assets/possibilitators/)
  * 2. Auto-generated initials avatar (fallback)
  * 
  * ── EXPECTED COLUMNS ─────────────────────────────────
@@ -238,6 +239,8 @@ function createCard(person) {
   avatar.className = 'possibilitator-avatar';
 
   const img = document.createElement('img');
+  img.loading = 'lazy';
+  img.decoding = 'async';
   const initials = document.createElement('div');
   initials.className = 'avatar-initials';
   initials.textContent = getInitials(person.name || '?');
@@ -303,7 +306,15 @@ function getPhotoSrc(person) {
   const url = (person.photo_url || '').trim();
   if (!url) return null;
   // If it's a full URL, use it directly
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    // Imgur optimization: add 'm' thumbnail suffix for smaller images
+    // e.g. https://i.imgur.com/UB2oy35.png -> https://i.imgur.com/UB2oy35m.png
+    const imgurMatch = url.match(/^(https:\/\/i\.imgur\.com\/[a-zA-Z0-9]+)(\.[a-z]+)$/i);
+    if (imgurMatch) {
+      return imgurMatch[1] + 'm' + imgurMatch[2];
+    }
+    return url;
+  }
   // Otherwise treat as a local filename in assets/possibilitators/
   return 'assets/possibilitators/' + url;
 }
