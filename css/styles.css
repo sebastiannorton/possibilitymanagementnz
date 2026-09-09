@@ -547,21 +547,19 @@ nav {
 }
 
 .newsletter-header {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    flex-wrap: wrap;
+    text-align: center;
     margin-bottom: 20px;
 }
 
 .newsletter-header h2 {
-    margin-bottom: 0;
+    margin-bottom: 0.5rem;
 }
 
 .substack-subtitle {
     color: var(--accent-primary);
     font-size: 0.95rem;
     margin-bottom: 0;
+    line-height: 1.4;
 }
 
 .substack-iframe-wrapper {
