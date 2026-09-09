@@ -279,6 +279,16 @@ function createEventCard(event, isPast) {
     badges.appendChild(badge);
   }
 
+  // Type badge
+  if (event.type && event.type.trim()) {
+    const typeStr = event.type.trim();
+    const typeBadge = document.createElement('span');
+    const typeClass = typeStr.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    typeBadge.className = 'event-badge event-badge--type event-badge--type-' + typeClass;
+    typeBadge.textContent = typeStr;
+    badges.appendChild(typeBadge);
+  }
+
   body.appendChild(badges);
 
   // Title

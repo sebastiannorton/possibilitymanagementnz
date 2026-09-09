@@ -541,6 +541,34 @@ nav {
 
 .newsletter h2 { margin-bottom: 1rem; }
 
+/* Newsletter Substack */
+.newsletter-substack {
+    margin: 40px 0;
+}
+
+.newsletter-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.newsletter-header h2 {
+    margin-bottom: 0;
+}
+
+.substack-subtitle {
+    color: var(--accent-primary);
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}
+
+.substack-iframe-wrapper {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
 .form-group {
     display: flex;
     max-width: 500px;
@@ -876,6 +904,31 @@ footer {
 .event-badge--past {
     background: rgba(0, 0, 0, 0.06);
     color: var(--text-color);
+}
+
+.event-badge--type-core-training {
+    background: rgba(224, 62, 0, 0.12);
+    color: #e03e00;
+}
+
+.event-badge--type-online-series {
+    background: rgba(0, 102, 204, 0.1);
+    color: #0066cc;
+}
+
+.event-badge--type-possibility-team {
+    background: rgba(138, 43, 226, 0.1);
+    color: #8a2be2;
+}
+
+.event-badge--type-possibility-management-contexted-training {
+    background: rgba(0, 128, 0, 0.1);
+    color: #008000;
+}
+
+.event-badge--type-possibility-management-contexted-other {
+    background: rgba(184, 134, 11, 0.12);
+    color: #b8860b;
 }
 
 .event-card-title {

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Noticeboard - Possibility Management NZ</title>
+    <link rel="icon" type="image/png" href="assets/logo.png">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -40,7 +41,7 @@
         <section id="village-events-section">
             <div class="container">
                 <div class="section-title">
-                    <h2>THE VILLAGE NOTICEBOARD</h2>
+                    <h2>THE POSSIBILITY MANAGEMENT VILLAGE NOTICEBOARD</h2>
                     <p style="font-size: 0.9rem; margin-top: 10px;">Click on the pictures to join a telegram group</p>
                 </div>
 
@@ -72,13 +73,11 @@
                     </div>
                 </div>
 
-                <div class="card" style="text-align: center;margin-bottom: 40px;">
-                    <h3>Here you find Village events powered by the thoughtware of Possibility Management.</h3>
-                    <h3>Some of them unfold from a mixed context.</h3>
-                </div>
-
-                <div id="village-events" class="events-stack">
-                    <div class="empty-state"><p>Loading events…</p></div>
+                <div class="card calendar-container-card" style="margin-bottom: 40px; padding: 20px;">
+                    <h3 style="text-align: center; margin-bottom: 20px;">Global Possibility Management Events Calendar</h3>
+                    <div class="teamup-wrapper" style="position: relative; padding-bottom: 65%; height: 0; overflow: hidden; max-width: 100%;">
+                        <iframe src="https://teamup.com/ksv2xq34sxiagcuei1?showSidepanel=1&showViewHeader=1&showViewMenu=1&showAgendaHeader=1&showAgendaDetails=0&showQuickView=0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 1px solid #cccccc;" frameborder="0"></iframe>
+                    </div>
                 </div>
 
             </div>
@@ -95,30 +94,20 @@
                     <a href="http://trainerpath.mystrikingly.com/" target="_blank">Trainer Path</a>
                 </div>
                 <div class="footer-col">
-                    <h4>Contact Us</h4>
-                    <p>+64 020 408 77083</p>
-                    <p>hello@ananorambuena.org</p>
-                </div>
-                <div class="footer-col">
                     <h4>Follow Us</h4>
-                    <div class="social-links">
+                    <div class="social-links-vertical">
                         <a href="https://www.facebook.com/possibilitymanagementaotearoa" target="_blank">Facebook</a>
                         <a href="https://www.youtube.com/@PossibilityManagementTV" target="_blank">YouTube</a>
+                        <a href="https://possibilitymanagementnews.substack.com/" target="_blank">Substack</a>
                     </div>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 Possibility Management New Zealand. All Rights Reserved.</p>
+                <p>&copy; 2026 Copyleft CC BY-SA Possibility Management New Zealand. All Rights Reserved.</p>
             </div>
         </div>
     </footer>
 
-    <script src="js/events.js"></script>
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        buildEventSections('/api/village-events.csv', 'village-events');
-      });
-    </script>
     <script src="js/main.js"></script>
 </body>
 </html>
