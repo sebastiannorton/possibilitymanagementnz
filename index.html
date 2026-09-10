@@ -17,7 +17,7 @@
                 <ul class="nav-links">
                     <li><a href="index.html">Home</a></li>
                     <li><a href="noticeboard.html">Noticeboard</a></li>
-                    <li><a href="https://rageclub.org/" target="_blank">Rage Club ↗</a></li>
+                    <li><a href="https://rageclub.org/" target="_blank">Rage Club<span class="external-icon">↗</span></a></li>
                     <li class="nav-item has-dropdown">
                         <span class="dropdown-toggle">Village</span>
                         <ul class="dropdown-menu">
@@ -26,7 +26,7 @@
                             <li><a href="articles.html">Articles</a></li>
                         </ul>
                     </li>
-                    <li><a href="https://possibilitymanagement.mystrikingly.com/" target="_blank">Codex ↗</a></li>
+                    <li><a href="https://possibilitymanagement.mystrikingly.com/" target="_blank">Codex<span class="external-icon">↗</span></a></li>
                 </ul>
                 <div class="burger">
                     <div class="line1"></div>
@@ -150,12 +150,20 @@
                     <p>Upcoming</p>
                     <h2>Possibility Management Spaces</h2>
                 </div>
+                <div id="pm-events" class="events-stack">
+                    <div class="empty-state"><p>Loading events…</p></div>
+                </div>
+            </div>
+        </section>
+
         <!-- Newsletter Section -->
         <section id="newsletter">
             <div class="container">
                 <div class="newsletter-substack">
-                    <h2>Possibility Management News</h2>
-                    <p class="substack-subtitle">Sparkling monthly possibilities! <br>No spam.</p>
+                    <div class="newsletter-header">
+                        <h2>Possibility Management News</h2>
+                        <p class="substack-subtitle">Sparkling monthly possibilities! <br>No spam.</p>
+                    </div>
                     <div class="substack-iframe-wrapper">
                         <iframe src="https://possibilitymanagementnews.substack.com/embed" width="100%" height="320" style="border:1px solid #EEE; background:black;" frameborder="0" scrolling="no"></iframe>
                     </div>
@@ -200,11 +208,17 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 Possibility Management New Zealand. All Rights Reserved.</p>
+                <p>&copy; 2026 Copyleft CC BY-SA Possibility Management New Zealand. All Rights Reserved.</p>
             </div>
         </div>
     </footer>
 
+    <script src="js/events.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        buildEventSections('/api/pm-events.csv', 'pm-events');
+      });
+    </script>
     <script src="js/main.js"></script>
 </body>
 </html>
