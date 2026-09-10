@@ -118,7 +118,7 @@ nav {
     background-image: url('../Images/Hero_Alps.webp');
     background-size: cover;
     background-position: center;
-    background-attachment: fixed;
+    /* background-attachment: fixed — removed for iOS Safari compatibility */
     background-repeat: no-repeat;
     position: relative;
 }
@@ -313,6 +313,17 @@ nav {
     cursor: pointer;
     transition: var(--transition);
     border: none;
+}
+
+
+
+/* Calendar button */
+.calendar-btn {
+    display: inline-block;
+    padding: 16px 40px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 10px;
 }
 
 .btn-primary {
@@ -542,6 +553,26 @@ nav {
 .newsletter h2 { margin-bottom: 1rem; }
 
 /* Newsletter Substack */
+
+
+/* Sleek external link indicator in nav */
+.nav-links a[target="_blank"] {
+    display: inline-flex;
+    align-items: center;
+}
+
+.nav-links a[target="_blank"] span.external-icon {
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 0.65em;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.nav-links a[target="_blank"]:hover span.external-icon {
+    opacity: 1;
+}
+
 .newsletter-substack {
     margin: 40px 0;
 }
