@@ -1307,6 +1307,19 @@ footer {
 .delay-4 { transition-delay: 0.4s; }
 
 /* Accessibility support for users who prefer reduced motion */
+
+
+/* Calendar responsive: show iframe on desktop, button on mobile */
+@media screen and (max-width: 768px) {
+    .calendar-desktop { display: none; }
+    .calendar-mobile-btn { display: block; }
+}
+
+@media screen and (min-width: 769px) {
+    .calendar-desktop { display: block; }
+    .calendar-mobile-btn { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .animate-on-scroll {
         opacity: 1 !important;
