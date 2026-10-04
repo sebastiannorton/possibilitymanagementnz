@@ -316,7 +316,7 @@ function getPhotoSrc(person) {
     return url;
   }
   // Otherwise treat as a local filename in assets/possibilitators/
-  return 'assets/possibilitators/' + url;
+  return '/assets/possibilitators/' + url;
 }
 
 function getInitials(name) {

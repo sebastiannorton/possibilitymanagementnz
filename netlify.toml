@@ -33,3 +33,35 @@
   to = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSU4q-qJs3v_sIzd3uQDjhwigwgd4fJmdJTAM1QsP2z-0td3DnYqD2XYzk6p-Dw2wgXtTYawllOV-Nu/pub?gid=1323395816&single=true&output=csv"
   status = 200
   force = true
+
+# Legacy URL redirects (301 permanent)
+# ==================================
+# Two pages were moved to clean, keyword-bearing directory URLs:
+#   purchase-books.html -> /books/
+#   noticeboard.html    -> /noticeboard/
+# The old .html paths and their extensionless variants are permanently
+# redirected so existing inbound links and bookmarks keep working.
+
+[[redirects]]
+  from = "/purchase-books.html"
+  to = "/books/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/purchase-books"
+  to = "/books/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/noticeboard.html"
+  to = "/noticeboard/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/noticeboard"
+  to = "/noticeboard/"
+  status = 301
+  force = true
