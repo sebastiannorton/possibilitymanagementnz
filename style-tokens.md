@@ -28,3 +28,8 @@ HOW TO APPLY
 - Match the fonts and the type scale; use the first font as the primary/heading face.
 - Carry the style through EVERY element - nav, buttons, links, inputs, cards, dividers, scrollbars - not just the hero.
 - Avoid the generic AI-default look (centered hero, an eyebrow pill, a gradient accent word, three icon feature cards) unless the source clearly uses it.
+
+TODO: ABOUT PAGE NOT BUILT
+- A 0-byte about.md at the site root was removed: an About page was planned but never built, and the empty file was referenced by no page, script or config.
+- No page on the site currently covers the organisation story - the index hero leads straight into content, not background.
+- If one is wanted it needs real content from the site owner plus a nav entry point (nav is Home, Noticeboard, Purchase Books, Collaboration, Articles). Do not invent the copy.
