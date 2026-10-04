@@ -1,0 +1,4 @@
+{
+  "//": "js/*.js are loaded as ES modules (<script type=\"module\">) and are imported by build/generate.mjs. This makes Node treat them the same way. Browsers ignore this file entirely. The repo root deliberately has NO package.json: netlify/functions/cors-proxy.js is CommonJS (exports.handler) and must not be switched to ESM by a root type:module.",
+  "type": "module"
+}

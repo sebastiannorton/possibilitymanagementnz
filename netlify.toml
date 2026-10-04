@@ -2,6 +2,16 @@
 # ======================
 
 [build]
+  # Pre-renders the published Sheet CSVs into index.html and articles.html so
+  # search engines see real event/author text instead of "Loading…". Uses only
+  # the Node standard library, and always exits 0 — a flaky Sheet must never
+  # fail a deploy (it keeps the previous markup instead).
+  command = "node build/generate.mjs"
+
+  # The site is plain static HTML served from the repo root, so the repo root
+  # is the publish directory.
+  publish = "."
+
   functions = "netlify/functions"
 
 # Netlify redirects / proxy rules

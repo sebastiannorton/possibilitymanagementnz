@@ -1,372 +1,182 @@
 /**
  * POSSIBILITATORS DIRECTORY — Articles Page
  * ==========================================
- * 
- * Reads from a published Google Sheet (via Netlify proxy), renders cards,
- * and fetches RSS feeds for latest articles.
- * 
+ *
+ * Progressive enhancement for the author grid.
+ *
+ * The page already contains pre-rendered author cards, written at deploy time
+ * by build/generate.mjs. This script fetches the CSV again and compares what it
+ * renders with what is already on screen:
+ *   - same content  → the pre-rendered DOM is left alone
+ *   - changed Sheet → the grid is refreshed, exactly as before
+ *   - fetch failed  → the pre-rendered cards remain on screen
+ *
+ * It then does the one thing HTML cannot: fetch each author's RSS feed and
+ * upgrade the "View latest writing" link into their actual latest article.
+ *
+ * All parsing, filtering and card markup lives in js/shared/data.js, which the
+ * build script imports too, so the two paths cannot drift.
+ *
  * ── HOW TO UPDATE ─────────────────────────────────────────
  * 1. Edit the Google Sheet: https://docs.google.com/spreadsheets/d/1KNXcr4MWsAP7KWf2e0aJ6G9VPWpI-4py9JilHhVdyz4/edit?usp=sharing
  * 2. The site reads from /api/possibilitators.csv, proxied by Netlify
  *    to the published CSV URL (see netlify.toml).
  * 3. To change the sheet, update the 'to' URL in netlify.toml only.
  *    No code changes needed.
- * 
+ *
  * ── PHOTO PRIORITY ───────────────────────────────────
  * 1. photo_url column — full URL (e.g. Google Drive / Substack image) OR
  *    bare filename (e.g. "AnneChloe.png" → looks in assets/possibilitators/)
  * 2. Auto-generated initials avatar (fallback)
- * 
+ *
  * ── EXPECTED COLUMNS ─────────────────────────────────
  * id, name, photo_url, writing_url, platform, rss_url, short_bio, location, active, notes_internal
  */
+
+import {
+  fetchCSVText,
+  parsePossibilitatorRows,
+  renderPossibilitatorCardsHTML,
+  filterPossibilitators,
+  possibiltatorFallbackHTML,
+  contentSignature,
+  escapeHTML,
+} from './shared/data.js';
 
 /* ==========================================================
    CONFIG — Change these values as needed
    ========================================================== */
 
 const SHEET_CSV_URL = '/api/possibilitators.csv';
-
-function getFallbackText(platform) {
-  return `View latest writing on ${getPlatformName(platform)}`;
-}
-
-function getPlatformName(platform) {
-  const p = (platform || '').trim();
-  if (!p) return 'Substack';
-  // Capitalise first letter of each word
-  return p.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
-}
+const GRID_ID = 'possibilitators-grid';
 
 /* ==========================================================
    MAIN
    ========================================================== */
 
-document.addEventListener('DOMContentLoaded', () => {
-  fetchCSV(SHEET_CSV_URL)
-    .then((rows) => {
-      console.log(`[articles] CSV parsed: ${rows.length} total rows`);
+async function init() {
+  const grid = document.getElementById(GRID_ID);
+  if (!grid) {
+    console.warn(`[articles] Mount element #${GRID_ID} not found`);
+    return;
+  }
 
-      const kept = [];
-      const dropped = [];
-
-      for (const r of rows) {
-        const name = (r.name || '').trim();
-        const activeVal = (r.active || '').trim().toLowerCase();
-        const isActive = activeVal === '' || activeVal === 'yes' || activeVal === 'y' || activeVal === 'true' || activeVal === '1';
-
-        if (!name) {
-          dropped.push({ name: '(empty)', reason: 'no name' });
-          continue;
-        }
-        if (!isActive) {
-          dropped.push({ name, reason: `active=${activeVal}` });
-          continue;
-        }
-        kept.push(r);
-      }
-
-      console.debug(`[CSV] Total rows parsed: ${rows.length}`);
-      console.debug(`[CSV] Names kept:`, kept.map(p => p.name));
-      console.debug(`[CSV] Names dropped:`, dropped.map(d => `${d.name} (${d.reason})`));
-
-      kept.sort((a, b) =>
-        (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase())
-      );
-
-      console.log(`[articles] After filtering: ${kept.length} active possibilitators`);
-      console.log(`[articles] Names:`, kept.map(p => p.name));
-
-      if (kept.length === 0) {
-        showEmptyState(`CSV loaded (${rows.length} rows) but 0 valid possibilitators found. Add a row with active=yes and a name to get started.`);
-        return;
-      }
-
-      renderCards(kept);
-      kept.forEach(fetchRSS);
-    })
-    .catch((err) => {
-      console.warn('[articles] CSV fetch failed:', err);
+  let rows;
+  try {
+    rows = parsePossibilitatorRows(await fetchCSVText(SHEET_CSV_URL));
+  } catch (err) {
+    console.warn('[articles] CSV fetch failed:', err);
+    // Keep the pre-rendered cards if the build produced them; only show the
+    // error state when there is nothing to show.
+    if (!grid.dataset.signature) {
       showEmptyState('Could not load the directory. Check that the Netlify proxy is working.');
-    });
-});
-
-/* ==========================================================
-   CSV PARSING — robust, handles BOM, quotes, embedded newlines
-   ========================================================== */
-
-async function fetchCSV(url) {
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-  const text = await resp.text();
-
-  console.log(`[articles] Raw CSV length: ${text.length} bytes`);
-  console.log(`[articles] First 500 chars:\n${text.slice(0, 500)}`);
-
-  return parseCSV(text);
-}
-
-/**
- * Parse CSV text into an array of objects.
- * Single-pass character-by-character parser that handles:
- * - BOM, \r\n, \n line endings
- * - double-quoted fields with commas inside
- * - escaped quotes ("")
- * - empty trailing fields
- */
-function parseCSV(csv) {
-  // Strip UTF-8 BOM if present
-  if (csv.charCodeAt(0) === 0xFEFF) {
-    csv = csv.slice(1);
-  }
-
-  // Normalize line endings
-  csv = csv.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-
-  // Single-pass: parse all rows and fields at once
-  const rows = [];
-  let row = [];
-  let field = '';
-  let inQuotes = false;
-
-  for (let i = 0; i < csv.length; i++) {
-    const ch = csv[i];
-    const next = i + 1 < csv.length ? csv[i + 1] : '';
-
-    if (ch === '"') {
-      if (inQuotes && next === '"') {
-        // Escaped quote inside quoted field
-        field += '"';
-        i++;
-      } else {
-        // Toggle quote mode
-        inQuotes = !inQuotes;
-      }
-    } else if (ch === ',' && !inQuotes) {
-      // End of field
-      row.push(field.trim());
-      field = '';
-    } else if (ch === '\n' && !inQuotes) {
-      // End of row
-      row.push(field.trim());
-      rows.push(row);
-      row = [];
-      field = '';
     } else {
-      field += ch;
+      console.info('[articles] Keeping pre-rendered directory after a failed refresh.');
     }
-  }
-  // Last field / row
-  if (field.trim() || row.length > 0) {
-    row.push(field.trim());
-    rows.push(row);
+    return;
   }
 
-  if (rows.length < 2) return [];
+  console.log(`[articles] CSV parsed: ${rows.length} total rows`);
 
-  // First row is headers
-  const rawHeaders = rows[0];
-  console.log(`[articles] Raw headers:`, rawHeaders);
-
-  // Normalize headers to lowercase snake_case with fuzzy matching
-  const headerMap = rawHeaders.map((h) => {
-    let key = h.toLowerCase().trim();
-    key = key.replace(/[^a-z0-9_ ]/g, '').trim();
-    key = key.replace(/\s+/g, '_');
-
-    const aliases = {
-      'short_bio': ['short_bio', 'shortbio', 'bio', 'short_description', 'shortdescription'],
-      'photo_url': ['photo_url', 'photourl', 'photo', 'image_url', 'imageurl', 'image', 'picture', 'avatar'],
-      'substack_url': ['substack_url', 'substackurl', 'substack', 'website', 'link', 'url', 'writing_url', 'writingurl'],
-      'rss_url': ['rss_url', 'rssurl', 'rss', 'feed', 'feed_url'],
-      'notes_internal': ['notes_internal', 'notesinternal', 'notes', 'internal_notes'],
-    };
-
-    for (const [canonical, variants] of Object.entries(aliases)) {
-      if (variants.includes(key)) return canonical;
-    }
-    return key;
-  });
-
-  console.log(`[articles] Normalized headers:`, headerMap);
-
-  // Parse data rows
-  const result = [];
-  const expected = ['id', 'name', 'photo_url', 'substack_url', 'platform', 'rss_url', 'short_bio', 'location', 'active', 'notes_internal'];
-
-  for (let i = 1; i < rows.length; i++) {
-    const fields = rows[i];
-    if (fields.length === 0 || (fields.length === 1 && fields[0] === '')) continue;
-
-    const row = {};
-    headerMap.forEach((key, idx) => {
-      row[key] = (fields[idx] || '').trim();
-    });
-
-    // Ensure all expected keys exist
-    expected.forEach((k) => {
-      if (!(k in row)) row[k] = '';
-    });
-
-    result.push(row);
+  const { kept, dropped } = filterPossibilitators(rows);
+  console.debug(`[articles] Kept ${kept.length}:`, kept.map((p) => p.name));
+  if (dropped.length > 0) {
+    console.debug('[articles] Dropped:', dropped.map((d) => `${d.name} (${d.reason})`));
   }
 
-  return result;
-}
+  const html = renderPossibilitatorCardsHTML(rows);
 
-/* ==========================================================
-   RENDER
-   ========================================================== */
-
-function renderCards(people) {
-  const grid = document.getElementById('possibilitators-grid');
-  if (!grid) return;
-
-  grid.innerHTML = '';
-  people.forEach((person) => {
-    const card = createCard(person);
-    grid.appendChild(card);
-  });
-}
-
-function createCard(person) {
-  const card = document.createElement('div');
-  card.className = 'possibilitator-card';
-  card.dataset.id = person.id || '';
-
-  // Avatar / photo
-  const avatar = document.createElement('div');
-  avatar.className = 'possibilitator-avatar';
-
-  const img = document.createElement('img');
-  img.loading = 'lazy';
-  img.decoding = 'async';
-  const initials = document.createElement('div');
-  initials.className = 'avatar-initials';
-  initials.textContent = getInitials(person.name || '?');
-
-  const photoSrc = getPhotoSrc(person);
-  if (photoSrc) {
-    img.src = photoSrc;
-    img.alt = person.name || 'Possibilitator';
-    img.onerror = () => {
-      img.style.display = 'none';
-      initials.style.display = 'flex';
-    };
-    avatar.appendChild(img);
-    initials.style.display = 'none';
-    avatar.appendChild(initials);
+  // Identical to the build output → the cards on screen are already correct.
+  const signature = contentSignature(html);
+  if (grid.dataset.signature === signature) {
+    console.debug('[articles] matches pre-rendered content, no refresh needed.');
   } else {
-    avatar.appendChild(initials);
+    grid.innerHTML = html;
+    grid.dataset.signature = signature;
   }
 
-  // Info
-  const info = document.createElement('div');
-  info.className = 'possibilitator-info';
+  enhanceCards(grid);
 
-  const nameEl = document.createElement('h3');
-  nameEl.textContent = person.name || 'Unnamed';
-
-  const bioEl = document.createElement('p');
-  bioEl.className = 'possibilitator-bio';
-  bioEl.textContent = person.short_bio || '';
-
-  const locationEl = document.createElement('p');
-  locationEl.className = 'possibilitator-location';
-  if (person.location) {
-    locationEl.textContent = person.location;
-  }
-
-  const platform = getPlatformName(person.platform);
-  const btn = document.createElement('a');
-  btn.className = 'btn btn-outline substack-btn';
-  btn.href = person.substack_url || '#';
-  btn.target = '_blank';
-  btn.textContent = `Visit ${platform} ↗`;
-
-  // Latest article (right column)
-  const rssBox = document.createElement('div');
-  rssBox.className = 'latest-article';
-  rssBox.id = 'rss-' + (person.id || Math.random().toString(36).slice(2));
-  rssBox.innerHTML = `<span class="rss-loading">Loading latest article…</span>`;
-
-  info.appendChild(nameEl);
-  info.appendChild(bioEl);
-  if (person.location) info.appendChild(locationEl);
-  info.appendChild(btn);
-
-  card.appendChild(avatar);
-  card.appendChild(info);
-  card.appendChild(rssBox);
-
-  return card;
-}
-
-function getPhotoSrc(person) {
-  const url = (person.photo_url || '').trim();
-  if (!url) return null;
-  // If it's a full URL, use it directly
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    // Imgur optimization: add 'm' thumbnail suffix for smaller images
-    // e.g. https://i.imgur.com/UB2oy35.png -> https://i.imgur.com/UB2oy35m.png
-    const imgurMatch = url.match(/^(https:\/\/i\.imgur\.com\/[a-zA-Z0-9]+)(\.[a-z]+)$/i);
-    if (imgurMatch) {
-      return imgurMatch[1] + 'm' + imgurMatch[2];
-    }
-    return url;
-  }
-  // Otherwise treat as a local filename in assets/possibilitators/
-  return '/assets/possibilitators/' + url;
-}
-
-function getInitials(name) {
-  const parts = (name || '').trim().split(/\s+/);
-  if (parts.length === 0) return '?';
-  if (parts.length === 1) return parts[0][0].toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  if (kept.length === 0) return;
+  kept.forEach((person, i) => fetchRSS(person, grid, i));
 }
 
 function showEmptyState(message) {
-  const grid = document.getElementById('possibilitators-grid');
+  const grid = document.getElementById(GRID_ID);
   if (!grid) return;
   grid.innerHTML = `
     <div class="empty-state">
-      <p>${message || 'The directory is being seeded. Check back soon for Possibilitators writing on Substack.'}</p>
+      <p>${escapeHTML(message || 'The directory is being seeded. Check back soon for Possibilitators writing on Substack.')}</p>
     </div>
   `;
 }
 
 /* ==========================================================
-   RSS FETCH
+   DOM ENHANCEMENT
    ========================================================== */
 
-async function fetchRSS(person) {
-  const rssId = 'rss-' + (person.id || '');
-  const rssBox = document.getElementById(rssId);
-  const fallback = getFallbackText(person.platform);
-  if (!rssBox || !person.rss_url) {
-    if (rssBox) rssBox.innerHTML = `<a href="${person.substack_url || '#'}" target="_blank">${fallback}</a>`;
+/**
+ * Add the behaviour that static HTML cannot carry: fall back to initials when
+ * a photo fails to load. Safe to run over pre-rendered or freshly built cards.
+ *
+ * @param {HTMLElement} grid
+ */
+function enhanceCards(grid) {
+  grid.querySelectorAll('.possibilitator-card').forEach((card) => {
+    if (card.dataset.enhanced === 'true') return;
+    card.dataset.enhanced = 'true';
+
+    const img = card.querySelector('.possibilitator-avatar img');
+    const initials = card.querySelector('.avatar-initials');
+    if (!img || !initials) return;
+
+    img.addEventListener('error', () => {
+      img.style.display = 'none';
+      initials.style.display = 'flex';
+    });
+  });
+}
+
+
+/* ==========================================================
+   RSS FETCH — upgrades each card's link to the latest article
+   ========================================================== */
+
+/**
+ * Fetch an author's latest article and swap it into their card.
+ * The pre-rendered fallback link is left in place if anything goes wrong.
+ *
+ * @param {object} person
+ * @param {HTMLElement} grid
+ * @param {number} index - position of the card within the grid
+ */
+async function fetchRSS(person, grid, index) {
+  const rssBox = grid.querySelector(`.possibilitator-card:nth-child(${index + 1}) .latest-article`);
+  if (!rssBox) return;
+
+  if (!person.rss_url) {
+    rssBox.innerHTML = possibiltatorFallbackHTML(person);
     return;
   }
 
   try {
     const data = await tryFetchRSS(person.rss_url);
-    if (data && data.title && data.link) {
-      const imgHtml = data.image
-        ? `<img class="rss-thumb" src="${escapeHTML(data.image)}" alt="" loading="lazy" onerror="this.style.display='none'">`
-        : '';
-      rssBox.innerHTML = `
-        <span class="rss-label">Latest:</span>
-        <div class="rss-entry">
-          ${imgHtml}
-          <a href="${data.link}" target="_blank" class="rss-title">${escapeHTML(data.title)}</a>
-        </div>
-      `;
-    } else {
-      throw new Error('No items');
-    }
-  } catch (e) {
-    rssBox.innerHTML = `<a href="${person.substack_url || '#'}" target="_blank">${fallback}</a>`;
+    if (!data || !data.title || !data.link) throw new Error('No items');
+
+    const imgHtml = data.image
+      ? `<img class="rss-thumb" src="${escapeHTML(data.image)}" alt="" loading="lazy" onerror="this.style.display='none'">`
+      : '';
+
+    rssBox.innerHTML = `
+      <span class="rss-label">Latest:</span>
+      <div class="rss-entry">
+        ${imgHtml}
+        <a href="${escapeHTML(data.link)}" target="_blank" rel="noopener noreferrer" class="rss-title">${escapeHTML(data.title)}</a>
+      </div>
+    `;
+  } catch (err) {
+    // Keep whatever is already rendered (the build-time fallback link).
+    console.debug(`[articles] RSS failed for ${person.name}:`, err);
   }
 }
 
@@ -374,10 +184,10 @@ async function tryFetchRSS(rssUrl) {
   // Always fetch via Netlify CORS proxy to avoid CORS issues
   const proxiedUrl = '/.netlify/functions/cors-proxy?url=' + encodeURIComponent(rssUrl);
   try {
-    const item = await parseRSS(proxiedUrl);
-    if (item) return item;
-  } catch (_) {}
-  return null;
+    return await parseRSS(proxiedUrl);
+  } catch (_) {
+    return null;
+  }
 }
 
 async function parseRSS(url) {
@@ -429,8 +239,12 @@ async function parseRSS(url) {
   return { title: title.trim(), link: link.trim(), image: image.trim() };
 }
 
-function escapeHTML(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+/* ==========================================================
+   BOOT
+   ========================================================== */
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
 }

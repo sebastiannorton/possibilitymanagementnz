@@ -1,0 +1,4 @@
+{
+  "//": "Scopes js/shared/*.js to ES modules so the Node build script can import the exact same files the browser loads. The repo root deliberately has no package.json: netlify/functions/cors-proxy.js is CommonJS (exports.handler) and must not be switched to ESM by a root type:module.",
+  "type": "module"
+}

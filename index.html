@@ -151,8 +151,23 @@
                     <p>Upcoming</p>
                     <h2>Possibility Management Spaces</h2>
                 </div>
-                <div id="pm-events" class="events-stack">
-                    <div class="empty-state"><p>Loading events…</p></div>
+                <div id="pm-events" class="events-stack" data-signature="1aab2109">
+                    <!-- build:pm-events:start -->
+                    <h3 class="event-section-heading">Recurring</h3>
+                    <div class="event-card"><div class="event-card-image"><img src="https://i.imgur.com/sQk2aIvm.png" alt="Heart Gym" loading="lazy" decoding="async" referrerpolicy="no-referrer"></div><div class="event-card-body"><div class="event-card-badges"><span class="event-badge event-badge--recurring">Recurring</span><span class="event-badge event-badge--type event-badge--type-possibility-management-contexted-other">Possibility Management Contexted Other</span></div><h3 class="event-card-title">Heart Gym</h3><p class="event-card-date">Every Monday 5pm to 5:45pm</p><p class="event-card-location">Online (Zoom)</p><p class="event-card-description">Heart Gym is an online or in-person research and practice space to connect with your Emotional Body, come into Experiential Reality, and practice your Basic Inner Navigation Skills (BINS), while honing your ability to Hold Space and create Intimacy. Connecting with your Emotional Body requires you to Consciously Feel, which means to feel and distinguish between the Four Feelings - Anger, Sadness, Fear, and Joy - on purpose. Feelings serve your Being by delivering you energetic information to use to take action in your life for what you care about. This space involves no money exchange.</p><p class="event-card-organiser">Organised by Sónia Gonçalves (Telegram: @soniamaiagoncalves)</p></div></div>
+                    <div class="event-card"><div class="event-card-image"><img src="https://i.imgur.com/EmBeop7m.jpeg" alt="Womans Anger Possibility Team" loading="lazy" decoding="async" referrerpolicy="no-referrer"></div><div class="event-card-body"><div class="event-card-badges"><span class="event-badge event-badge--recurring">Recurring</span><span class="event-badge event-badge--type event-badge--type-possibility-team">Possibility Team</span></div><h3 class="event-card-title">Womans Anger Possibility Team</h3><p class="event-card-date">Every Thursday 7pm to 8:30pm</p><p class="event-card-location">Online (Zoom)</p><p class="event-card-description">Growing up in modern culture, you have probably learned that anger is dangerous and not okay. 
+
+                    What you might not have learned is that conscious anger can be fuel to:
+
+                    * Come fully into your body, your space 
+                    * Make boundaries
+                    * Say Yes and No and mean it
+                    * Speak from your heart
+                    * Create the life you want 
+                    * Guard the Earth, care for what you love
+                    * Be a stand for something bigger than yourself
+                    * And become an unreasonable YES to your own amazingness! $10-20 sliding scale</p><p class="event-card-organiser">Organised by Mia Ruby Harrison (Email: miarubyh@gmail.com)</p></div></div>
+                    <!-- build:pm-events:end -->
                 </div>
             </div>
         </section>
@@ -214,11 +229,9 @@
         </div>
     </footer>
 
-    <script src="/js/events.js"></script>
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        buildEventSections('/api/pm-events.csv', 'pm-events');
-      });
+    <script type="module">
+      import { buildEventSections } from '/js/events.js';
+      buildEventSections('/api/pm-events.csv', 'pm-events');
     </script>
     <script src="/js/main.js"></script>
 </body>
