@@ -47,7 +47,7 @@ export const EVENT_FIELDS = [
 /** Columns guaranteed to exist on every possibilitator row. */
 export const POSSIBILITATOR_FIELDS = [
   'id', 'name', 'photo_url', 'substack_url', 'platform', 'rss_url',
-  'short_bio', 'location', 'active', 'notes_internal'
+  'short_bio', 'location', 'job_title', 'works_for', 'active', 'notes_internal'
 ];
 
 /**
@@ -60,6 +60,8 @@ export const POSSIBILITATOR_ALIASES = {
   photo_url: ['photo_url', 'photourl', 'photo', 'image_url', 'imageurl', 'image', 'picture', 'avatar'],
   substack_url: ['substack_url', 'substackurl', 'substack', 'website', 'link', 'url', 'writing_url', 'writingurl'],
   rss_url: ['rss_url', 'rssurl', 'rss', 'feed', 'feed_url'],
+  job_title: ['job_title', 'jobtitle', 'job_title_pm', 'role', 'title'],
+  works_for: ['works_for', 'worksfor', 'affiliation', 'organisation', 'organization', 'company', 'employer', 'trained_by'],
   notes_internal: ['notes_internal', 'notesinternal', 'notes', 'internal_notes']
 };
 

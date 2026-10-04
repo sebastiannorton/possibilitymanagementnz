@@ -38,8 +38,17 @@ import {
   parsePossibilitatorRows,
   renderEventSectionsHTML,
   renderPossibilitatorCardsHTML,
+  classifyEvents,
+  filterPossibilitators,
   contentSignature,
 } from '../js/shared/data.js';
+
+import {
+  buildOrganizationSchema,
+  buildEventSchema,
+  buildPersonSchema,
+  buildBookSchema,
+} from '../js/shared/schema.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -67,6 +76,109 @@ const TARGETS = [
     parse: parsePossibilitatorRows,
     render: (rows) => renderPossibilitatorCardsHTML(rows),
     count: (html) => (html.match(/possibilitator-card/g) || []).length,
+  },
+];
+
+/**
+ * STRUCTURED DATA — one ld+json block per type per page.
+ *
+ * Each entry names the page, the marker id the block lives between, and a
+ * `build()` that returns the finished <script> element (or null when the page
+ * has nothing to describe). `build()` receives the SAME rows the card markup
+ * was rendered from — the events sheet drives both the visible cards and the
+ * Event schema, so they cannot disagree about which events exist.
+ *
+ * The Organization block is static: the site identity does not come from a
+ * Sheet, so it is generated on every build with no network access and is not
+ * skipped when a fetch fails.
+ *
+ * `sheetKey` links a schema block to the sheet that feeds it. When that sheet
+ * cannot be fetched the block is left exactly as the last successful build
+ * wrote it — never emptied — so a flaky Sheet cannot strip structured data.
+ */
+const SCHEMA_TARGETS = [
+  {
+    page: 'index.html',
+    id: 'schema-organization',
+    type: 'Organization',
+    build: () => buildOrganizationSchema(),
+  },
+  {
+    page: 'index.html',
+    id: 'schema-event',
+    type: 'Event',
+    sheetKey: '/api/pm-events.csv',
+    // Past events are excluded here too: only the Recurring and Upcoming
+    // clusters are described, exactly the two clusters rendered on the page.
+    build: (rows) => {
+      const { recurring, upcoming } = classifyEvents(rows);
+      return buildEventSchema([recurring, upcoming]);
+    },
+  },
+  {
+    page: 'articles.html',
+    id: 'schema-person',
+    type: 'Person',
+    sheetKey: '/api/possibilitators.csv',
+    build: (rows) => buildPersonSchema(filterPossibilitators(rows).kept),
+  },
+  {
+    page: 'books/index.html',
+    id: 'schema-book',
+    type: 'Book',
+    build: () => buildBookSchema(BOOKS),
+  },
+];
+
+/**
+ * The books shown on books/index.html.
+ *
+ * Mirrors the visible cards exactly — title, author, price and the order link
+ * are all on the page. There is deliberately NO `isbn` and NO `availability`:
+ * the site publishes neither, and inventing an ISBN would be both untrue and a
+ * violation of Google's product-snippet guidelines. Add the fields here (or
+ * point this at a Sheet) and the Book schema picks them up automatically.
+ */
+const BOOKS = [
+  {
+    title: 'Four Feelings',
+    author: 'Valerie Lankford',
+    image: '/Images/Books/4Feelings.png',
+    price: '25',
+    price_currency: 'NZD',
+    order_url: 'https://forms.gle/vr9gDP1JBS2Fo72RA',
+  },
+  {
+    title: 'White Witch of Tenerife',
+    author: 'Clinton Callahan',
+    image: '/Images/Books/WhiteWitch.png',
+    price: '30',
+    price_currency: 'NZD',
+    order_url: 'https://forms.gle/vr9gDP1JBS2Fo72RA',
+  },
+  {
+    title: 'Goodnight Feelings',
+    author: 'Clinton Callahan',
+    image: '/Images/Books/GoodnightFeelings.png',
+    price: '30',
+    price_currency: 'NZD',
+    order_url: 'https://forms.gle/vr9gDP1JBS2Fo72RA',
+  },
+  {
+    title: 'No Reason',
+    author: 'Clinton Callahan',
+    image: '/Images/Books/NoReason.png',
+    price: '33',
+    price_currency: 'NZD',
+    order_url: 'https://forms.gle/vr9gDP1JBS2Fo72RA',
+  },
+  {
+    title: 'Cavitation',
+    author: 'Clinton Callahan',
+    image: '/Images/Books/Cavitation.png',
+    price: '42',
+    price_currency: 'NZD',
+    order_url: 'https://forms.gle/vr9gDP1JBS2Fo72RA',
   },
 ];
 
@@ -196,7 +308,7 @@ export function stampSignature(html, id, signature) {
  *
  * @returns {Promise<'updated'|'unchanged'|'skipped'|'failed'>}
  */
-async function processTarget(target, url) {
+async function processTarget(target, url, rowsBySheet) {
   const pagePath = join(ROOT, target.page);
 
   let html = await readFile(pagePath, 'utf8');
@@ -222,6 +334,10 @@ async function processTarget(target, url) {
     warn(`Leaving ${target.page} untouched — the browser will still fetch and render it live.`);
     return 'failed';
   }
+
+  // Keep the parsed rows so the structured-data pass describes the exact same
+  // events the cards above were rendered from — one fetch, one source.
+  rowsBySheet.set(target.sheetKey, rows);
 
   // 3. Render, using the same functions the browser scripts use.
   let content;
@@ -256,6 +372,112 @@ async function processTarget(target, url) {
   return 'updated';
 }
 
+/* ==========================================================
+   STRUCTURED DATA INJECTION
+   ========================================================== */
+
+/**
+ * Parse back every ld+json block in a page and report the results.
+ *
+ * This is the acceptance check: the block is re-read from the exact text that
+ * will ship and run through JSON.parse, so a block is only ever written if it
+ * is strictly valid JSON. It also catches the classic hand-editing failures —
+ * a trailing comma, or an unescaped quote in a Sheet description.
+ *
+ * @returns {{total: number, ok: number, errors: Array<{page: string, error: string}>}}
+ */
+export function validateSchemaBlocks(page, html) {
+  const errors = [];
+  const re = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  let total = 0;
+  let match;
+
+  while ((match = re.exec(html)) !== null) {
+    total++;
+    try {
+      JSON.parse(match[1]);
+    } catch (err) {
+      errors.push({ page, error: err.message });
+    }
+  }
+
+  return { total, ok: total - errors.length, errors };
+}
+
+/** How many @graph entries a rendered block carries — for the build log. */
+function countNodes(block) {
+  try {
+    const json = block.replace(/^<script[^>]*>\s*/, '').replace(/\s*<\/script>$/, '');
+    const doc = JSON.parse(json);
+    return Array.isArray(doc['@graph']) ? doc['@graph'].length : 1;
+  } catch (err) {
+    return 0;
+  }
+}
+
+/**
+ * Write one ld+json block into its page between the build markers.
+ *
+ * Never throws. If the block cannot be built, fails validation, or the markers
+ * are missing, the page keeps whatever the last successful build wrote.
+ *
+ * @returns {Promise<'updated'|'unchanged'|'skipped'|'failed'>}
+ */
+async function processSchemaTarget(target, rowsBySheet) {
+  const pagePath = join(ROOT, target.page);
+
+  // A sheet-backed block needs its data. If the Sheet failed, keep the last
+  // good block rather than deleting the structured data from the page.
+  if (target.sheetKey && !rowsBySheet.has(target.sheetKey)) {
+    warn(`${target.page} ${target.type}: no data for ${target.sheetKey} — keeping the previous block.`);
+    return 'skipped';
+  }
+
+  let block;
+  try {
+    block = target.build(rowsBySheet.get(target.sheetKey));
+  } catch (err) {
+    warn(`${target.page} ${target.type} schema failed (${err.message}). Keeping the previous block.`);
+    return 'failed';
+  }
+
+  // Nothing to describe (e.g. every event filtered out). Leave the page alone.
+  if (!block) {
+    warn(`${target.page} ${target.type}: nothing to describe — keeping the previous block.`);
+    return 'skipped';
+  }
+
+  // Verify before writing: never put invalid JSON on a page.
+  const check = validateSchemaBlocks(target.page, block);
+  if (check.total === 0 || check.errors.length > 0) {
+    warn(`${target.page} ${target.type}: generated block failed JSON validation — not written.`);
+    return 'failed';
+  }
+
+  let html;
+  try {
+    html = await readFile(pagePath, 'utf8');
+  } catch (err) {
+    warn(`${target.page} could not be read (${err.message}).`);
+    return 'failed';
+  }
+
+  const updated = injectIntoMount(html, target.id, block);
+  if (updated === null) {
+    warn(`${target.page} has no "${marker(target.id, 'start')}" markers — skipped.`);
+    return 'skipped';
+  }
+
+  if (updated === html) {
+    log(`${target.page} ${target.type}: structured data already up to date.`);
+    return 'unchanged';
+  }
+
+  await writeFile(pagePath, updated, 'utf8');
+  log(`${target.page}: wrote ${target.type} structured data (${countNodes(block)} node(s)).`);
+  return 'updated';
+}
+
 async function main() {
   let urls;
   try {
@@ -265,6 +487,9 @@ async function main() {
     return;
   }
 
+  // Rows parsed during the markup pass, reused by the structured-data pass.
+  const rowsBySheet = new Map();
+
   for (const target of TARGETS) {
     const url = urls[target.sheetKey];
     if (!url) {
@@ -272,13 +497,38 @@ async function main() {
       continue;
     }
     try {
-      await processTarget(target, url);
+      await processTarget(target, url, rowsBySheet);
     } catch (err) {
       // Belt and braces: a page that throws for any unforeseen reason must
       // still not take the deploy down with it.
       warn(`${target.page} failed unexpectedly (${err.message}). Leaving it untouched.`);
     }
   }
+
+  for (const target of SCHEMA_TARGETS) {
+    try {
+      await processSchemaTarget(target, rowsBySheet);
+    } catch (err) {
+      warn(`${target.page} ${target.type} failed unexpectedly (${err.message}).`);
+    }
+  }
+
+  // Final gate: re-read every page from disk and parse every block back.
+  const pages = [...new Set(SCHEMA_TARGETS.map((t) => t.page))];
+  let failures = 0;
+  for (const page of pages) {
+    const html = await readFile(join(ROOT, page), 'utf8').catch(() => null);
+    if (html === null) continue;
+    const { total, ok, errors } = validateSchemaBlocks(page, html);
+    for (const e of errors) {
+      warn(`INVALID JSON-LD in ${page}: ${e.error}`);
+      failures++;
+    }
+    if (total > 0) log(`${page}: ${ok}/${total} ld+json block(s) parse cleanly.`);
+  }
+
+  if (failures > 0) warn(`${failures} structured-data block(s) failed validation.`);
+  else log('All structured data validated.');
 }
 
 // The build must never fail the deploy. Exit 0 even on unexpected errors.
