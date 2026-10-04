@@ -1,0 +1,58 @@
+# Netlify custom headers
+# =======================
+#
+# netlify.toml sets no publish directory, so Netlify serves the repo root and
+# this file applies. Rules are listed most specific first. Netlify applies every
+# matching block, and when a header name repeats, the most specific path wins.
+
+# ---------------------------------------------------------------------------
+# 1. Images: one year.
+#
+# Deliberately no `immutable`. These filenames are NOT content-hashed (e.g.
+# Images/128335_461797.webp), so an immutable year-long cache would strand
+# returning visitors on stale images whenever a file is replaced in place.
+# ---------------------------------------------------------------------------
+
+/Images/*
+  Cache-Control: public, max-age=31536000
+
+/assets/*
+  Cache-Control: public, max-age=31536000
+
+# ---------------------------------------------------------------------------
+# 2. Stylesheets and scripts: one week. Hand-edited, not hashed, and deployed
+#    often, so a shorter window keeps changes flowing to visitors.
+# ---------------------------------------------------------------------------
+
+/css/*
+  Cache-Control: public, max-age=604800
+
+/js/*
+  Cache-Control: public, max-age=604800
+
+# ---------------------------------------------------------------------------
+# 3. HTML is always revalidated so content updates appear immediately.
+#
+# Both rules are needed: `/*.html` does not match the bare `/` request that
+# serves index.html, so the root path needs its own block.
+# ---------------------------------------------------------------------------
+
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+# ---------------------------------------------------------------------------
+# 4. Baseline security headers on every response.
+#
+# No Content-Security-Policy is set on purpose: index.html embeds a live
+# Substack iframe (possibilitymanagementnews.substack.com/embed) and any CSP
+# risks blocking that embed. Note X-Frame-Options governs this site being
+# framed, which does not affect the outbound Substack embed.
+# ---------------------------------------------------------------------------
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
