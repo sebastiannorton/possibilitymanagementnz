@@ -636,6 +636,7 @@ nav {
 .substack-iframe-wrapper {
     max-width: 600px;
     margin: 0 auto;
+    background-color: #fff;
 }
 
 .form-group {

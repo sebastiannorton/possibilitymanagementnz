@@ -205,9 +205,14 @@
                         <h2>Possibility Management News</h2>
                         <p class="substack-subtitle">Sparkling monthly possibilities! <br>No spam.</p>
                     </div>
-                    <div class="substack-iframe-wrapper">
-                        <iframe src="https://possibilitymanagementnews.substack.com/embed" width="100%" height="320" style="border:1px solid #EEE; background:black;" title="Possibility Management News newsletter subscription" frameborder="0" scrolling="no"></iframe>
-                    </div>
+                     <div class="substack-iframe-wrapper">
+                    <img id="substack-placeholder"
+                         src="/assets/substack-placeholder.jpg"
+                         alt="Load the newsletter signup form"
+                         role="button"
+                         tabindex="0"
+                         style="width:100%; height:auto; display:block; cursor:pointer;">
+                     </div>
                 </div>
             </div>
         </section>
@@ -273,5 +278,24 @@
       buildEventSections('/api/pm-events.csv', 'pm-events');
     </script>
     <script src="/js/main.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        var img = document.getElementById('substack-placeholder');
+        if (!img) return;
+        var wrapper = img.parentNode;
+        var loaded = false;
+        function loadIframe() {
+          if (loaded) return;
+          loaded = true;
+          img.style.transition = 'opacity 200ms ease-out';
+          img.style.opacity = '0';
+          setTimeout(function () {
+            wrapper.innerHTML = '<iframe src="https://possibilitymanagementnews.substack.com/embed" width="100%" height="320" style="border:1px solid #EEE; background:#fff;" title="Possibility Management Newsletter signup" frameborder="0" scrolling="no"></iframe>';
+          }, 200);
+        }
+        img.addEventListener('click', loadIframe);
+        img.addEventListener('focus', loadIframe);
+      });
+    </script>
 </body>
 </html>
