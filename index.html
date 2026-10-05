@@ -5,7 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Possibility Management New Zealand</title>
     <link rel="icon" type="image/png" href="/assets/logo.png">
+    <!-- Poppins. Both preconnects go first so the TLS handshake to the font
+         origins overlaps the download of styles.css below, rather than starting
+         only after it has been fetched and parsed. Loaded from a <link> instead
+         of an @import inside styles.css, which the preload scanner cannot see.
+         Only the faces this site actually renders are requested. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,600;1,300&amp;display=swap">
     <link rel="stylesheet" href="/css/styles.css">
+
+    <!-- The hero is div.hero-image-full, whose picture is a CSS background-image,
+         so it is invisible to the HTML preload scanner and only gets discovered
+         after styles.css arrives — the cause of the lcp-discovery-insight
+         failure (priorityHinted=false, requestDiscoverable=false). This starts the
+         fetch during HTML parsing instead.
+         The href is the root-relative form of '../Images/Hero_Alps.webp' in
+         styles.css, so it matches the CSS request exactly and the browser reuses
+         this single download rather than fetching the 314 KB image twice.
+         Not a hashed derivative: per _headers these filenames are stable and
+         deliberately not content-hashed, so this path stays correct. If the
+         pipeline is ever changed to emit hashed names, update this href to match
+         the url() in styles.css.
+         The hero is a background-image, so `loading="lazy"` cannot apply to it. -->
+    <link rel="preload" as="image" href="/Images/Hero_Alps.webp" fetchpriority="high">
     <link rel="canonical" href="https://possibilitymanagement.co.nz/">
 </head>
 <body>

@@ -1,4 +1,26 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&display=swap');
+/*
+ * NO @import FOR WEB FONTS — load Poppins with a <link> in each page <head>
+ * (see index.html and the other 4 pages). An @import inside a stylesheet is
+ * discovered only after this file has downloaded and been parsed, so it adds a
+ * full extra round-trip to the critical path and is flagged by Lighthouse's
+ * render-blocking-insight. A <link> is found during HTML parsing and downloads
+ * in parallel with this stylesheet.
+ *
+ * The URL below is trimmed to the faces this stylesheet actually renders.
+ * Audited against every page (chrome devtools network trace):
+ *   normal 300 - body, .hero-text-overlay p
+ *   normal 400 - h1-h6 and default text
+ *   normal 600 - .btn, .logo a, .hero-text-overlay h1, .event-card-title, ...
+ *   italic 300 - .rss-loading and .event-card-organiser (both inherit the
+ *                body's 300, so no other italic face is ever reached)
+ * The italic 400 and italic 600 faces were never requested by any page and
+ * have been dropped, cutting the returned CSS from 18 @font-face blocks to 12.
+ * Do NOT drop italic 300 — .event-card-organiser on the homepage would fall
+ * back to a synthesised oblique, which is a visible change.
+ * Add any NEW weight here too, otherwise it silently renders in a fallback.
+ *
+ * https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,600;1,300&display=swap
+ */
 
 :root {
     /* Colors */
@@ -306,6 +328,14 @@ nav {
     display: inline-block;
     padding: 12px 30px;
     border-radius: var(--border-radius);
+    /* NOTE: 'Nunito' is NOT loaded anywhere and never has been — the site only
+     * ever requested Poppins. An unresolvable family name costs no network
+     * request; it simply falls through to the system `sans-serif` below, so
+     * buttons have always rendered in the platform sans-serif.
+     * Left as-is deliberately: switching it to Poppins (or adding Nunito to the
+     * font <link>) WOULD change how every button looks, which is out of scope
+     * for the non-visual font-loading work. Confirm the intended typeface with
+     * the owner before changing this line. */
     font-family: 'Nunito', sans-serif;
     font-weight: 600;
     text-transform: uppercase;
