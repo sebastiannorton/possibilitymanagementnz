@@ -70,8 +70,9 @@
   status = 301
   force = true
 
-[[redirects]]
-  from = "/noticeboard"
-  to = "/noticeboard/"
-  status = 301
-  force = true
+# NOTE: there is deliberately NO explicit redirect for the extensionless
+# "/noticeboard". Netlify's default Pretty URLs behaviour already sends
+# /noticeboard to /noticeboard/. An explicit force rule for "/noticeboard"
+# also matches "/noticeboard/" (redirect matching is trailing-slash lenient),
+# so it redirects the page to itself in an endless 301 loop — which broke the
+# page in Firefox with "The page isn't redirecting properly". Do not re-add it.
