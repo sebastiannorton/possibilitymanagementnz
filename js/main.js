@@ -39,18 +39,20 @@ const heroFade = () => {
     if (!hero) return;
 
     const FADE_START = 200; // px scrolled past top of image before fade begins
-    const FADE_END = 600;   // px scrolled past top of image when fully faded
 
     const updateFade = () => {
         const rect = hero.getBoundingClientRect();
         const scrolledPast = -rect.top; // how many px the image top has scrolled up
+        // Finish the fade exactly as the picture's bottom edge reaches the top
+        // of the viewport, regardless of the hero's rendered height.
+        const fadeEnd = Math.max(FADE_START + 100, hero.offsetHeight);
 
         if (scrolledPast <= FADE_START) {
             hero.style.setProperty('--fade-opacity', '0');
-        } else if (scrolledPast >= FADE_END) {
+        } else if (scrolledPast >= fadeEnd) {
             hero.style.setProperty('--fade-opacity', '1');
         } else {
-            const progress = (scrolledPast - FADE_START) / (FADE_END - FADE_START);
+            const progress = (scrolledPast - FADE_START) / (fadeEnd - FADE_START);
             hero.style.setProperty('--fade-opacity', String(progress));
         }
     };
