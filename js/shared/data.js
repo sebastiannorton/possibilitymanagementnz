@@ -305,6 +305,12 @@ export function normalizeImageUrl(url) {
     return u;
   }
 
+  // Already a path on this site (e.g. "/Images/Books/4Feelings.png"). Pass it
+  // through untouched: only a bare FILENAME resolves into
+  // assets/possibilitators/, otherwise every existing path would gain that
+  // prefix and 404.
+  if (u.startsWith('/')) return u;
+
   // Otherwise treat as a local filename in assets/possibilitators/
   return '/assets/possibilitators/' + u;
 }
@@ -569,9 +575,12 @@ function renderPossibilitatorCardHTML(person, index) {
   const initials = getInitials(name);
   const rssId = (person.id || '').trim() || `name-${index}`;
 
+  // When there is a photo, the initials still ship in the markup (hidden), so
+  // the error fallback in js/articles.js has real letters to reveal. Emitting an
+  // empty div here would show a blank circle the moment a photo fails to load.
   const avatar = photoSrc
     ? `<img src="${escapeHTML(photoSrc)}" alt="${escapeHTML(name)}" loading="lazy" decoding="async">` +
-      '<div class="avatar-initials" style="display: none;"></div>'
+      `<div class="avatar-initials" style="display: none;">${escapeHTML(initials)}</div>`
     : `<div class="avatar-initials">${escapeHTML(initials)}</div>`;
 
   const bio = (person.short_bio || '').trim();

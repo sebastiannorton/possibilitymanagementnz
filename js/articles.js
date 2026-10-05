@@ -130,10 +130,22 @@ function enhanceCards(grid) {
     const initials = card.querySelector('.avatar-initials');
     if (!img || !initials) return;
 
-    img.addEventListener('error', () => {
+    const showInitials = () => {
       img.style.display = 'none';
       initials.style.display = 'flex';
-    });
+    };
+
+    img.addEventListener('error', showInitials);
+
+    // The cards are pre-rendered in the HTML, so the browser can start (and
+    // finish) fetching a photo BEFORE this module runs. An image that already
+    // failed has fired its error event and will never fire again — the listener
+    // above would wait forever and the broken-image icon would stay on screen.
+    // `complete` is true once loading has settled; `naturalWidth` is 0 for a
+    // failed image and non-zero for a real one, so this catches the late case.
+    if (img.complete && img.naturalWidth === 0) {
+      showInitials();
+    }
   });
 }
 

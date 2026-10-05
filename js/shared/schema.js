@@ -23,6 +23,8 @@
  *   stale structured-data block can never advertise a finished event.
  */
 
+import { normalizeImageUrl } from './data.js';
+
 /* ==========================================================
    SITE IDENTITY — mirrors the pages' <link rel="canonical"> values
    ========================================================== */
@@ -345,7 +347,10 @@ function eventNode(event) {
   set(node, 'name', title);
   set(node, 'description', event.description);
   set(node, 'eventStatus', 'EventScheduled');
-  set(node, 'image', event.image_url);
+  // Same resolution the card uses, so structured data can never advertise an
+  // image the page did not show. absolute() because structured data must be
+  // crawlable without the page.
+  set(node, 'image', absolute(normalizeImageUrl(event.image_url)));
 
   if (recurring) {
     const schedule = { '@type': 'Schedule' };
@@ -427,7 +432,7 @@ export function buildPersonSchema(rows) {
     set(node, 'url', url ? absolute(url) : '');
     set(node, 'jobTitle', person.job_title);
     set(node, 'worksFor', person.works_for);
-    set(node, 'image', absolute(person.photo_url || ''));
+    set(node, 'image', absolute(normalizeImageUrl(person.photo_url || '')));
 
     // Only real, absolute profile URLs. Identities shown as cards on the page.
     const sameAs = [url, person.rss_url]
