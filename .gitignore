@@ -6,3 +6,6 @@
 
 # Strikingly backup (not part of the site)
 pminnz.mystrikingly.com/
+
+# Locally-generated Lighthouse audit reports
+seo/
