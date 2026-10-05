@@ -634,20 +634,61 @@ nav {
 }
 
 .substack-iframe-wrapper {
-    max-width: 600px;
+    max-width: 720px;
     margin: 0 auto;
     background-color: #fff;
 }
 
-.substack-iframe-wrapper iframe {
+/* The Substack embed card is ~360-540px tall depending on viewport width and is
+   vertically centred inside whatever iframe box it gets — in any shorter box the
+   embed's own <body> scrolls (the scrollbar seen inside the widget). To show it
+   inside a box that exactly matches the placeholder image, the iframe is given a
+   LARGER internal viewport and scaled down with transform:scale(). The visible
+   box is locked and the oversized layout box clipped by .substack-iframe-frame,
+   which the loader script injects together with the iframe. */
+.substack-iframe-frame {
+    height: 504px;                 /* mobile box keeps the approved look, 20% taller */
+    overflow: hidden;
+}
+.substack-iframe-frame iframe {
     display: block;
-    width: 100%;
-    height: 400px;
+    width: calc(100% / 0.75);      /* internal viewport ~133% wide */
+    height: calc(504px / 0.75);    /* and 672px tall, scaled back to 504px */
+    transform: scale(0.75);
+    transform-origin: top left;
 }
 
-@media screen and (max-width: 480px) {
-    .substack-iframe-wrapper iframe {
-        height: 420px;
+/* >480px: box locked to the placeholder image's exact aspect ratio */
+@media screen and (min-width: 481px) {
+    .substack-iframe-frame {
+        height: auto;
+        aspect-ratio: 1230 / 662;
+    }
+    .substack-iframe-frame iframe {
+        width: calc(100% / 0.45);
+        height: calc(100% / 0.45);
+        transform: scale(0.45);
+    }
+}
+
+/* >640px: fluid box below the 720px cap — same internal render as the verified
+   600px look, slightly roomier as the box grows */
+@media screen and (min-width: 641px) {
+    .substack-iframe-frame iframe {
+        width: calc(100% / 0.62);
+        height: calc(100% / 0.62);
+        transform: scale(0.62);
+    }
+}
+
+/* >800px: container clears the 720px cap — the full 20%-bigger look: box
+   720x388 (image's exact ratio) with the internal render scaled up 20% so the
+   apparent content size grows with the box (seamless swap with the image) */
+@media screen and (min-width: 800px) {
+    .substack-iframe-frame iframe {
+        width: calc(100% / 0.74);
+        height: calc(100% / 0.74);
+        transform: scale(0.74);
     }
 }
 
