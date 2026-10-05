@@ -137,13 +137,16 @@ nav {
     height: 50vw;
     min-height: 300px;
     max-height: 80vh;
-    background-image: url('../Images/Hero_Alps.webp');
-    background-size: cover;
-    background-position: center;
-    /* background-attachment: fixed — removed for iOS Safari compatibility */
-    background-repeat: no-repeat;
+
     position: relative;
 }
+.hero-image-full img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
 
 .hero-text-overlay {
     position: absolute;
