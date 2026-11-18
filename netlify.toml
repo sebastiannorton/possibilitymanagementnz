@@ -2,15 +2,21 @@
 # ======================
 
 [build]
-  # 1. `tinacms build` generates the Tina admin UI into /admin (fails soft —
-  #    on a missing Tina token/credentials the `;` lets the rest run, so the
-  #    site still deploys; the sidebar just won't be available online).
-  # 2. Pre-renders the Tina content JSON into expand-the-box/index.html, and the
-  #    published Sheet CSVs into index.html and articles.html, so search
-  #    engines see real text instead of "Loading…". Uses only the Node
-  #    standard library, and always exits 0 — a flaky Sheet must never fail
-  #    a deploy (it keeps the previous markup instead).
-  command = "npx -y tinacms build; node build/generate.mjs"
+  # 1. `tinacms build` generates the Tina admin UI into /admin and the
+  #    generated client with cloud credentials (soft-fails via ';': on a
+  #    missing Tina token/credentials the rest still runs, the sidebar
+  #    just isn't available online; the site always deploys).
+  # 2. Astro builds the Expand the Box page into dist/client/ and writes
+  #    its Netlify server function to .netlify/v1/functions/ssr/ (the
+  #    island endpoint). build/deploy-astro.mjs then moves the page +
+  #    editing bridge into place. A hard failure here skips that step
+  #    (the last good page stays published) but does not block the deploy.
+  # 3. generate.mjs pre-renders the published Sheet CSVs into index.html
+  #    and articles.html, so search engines see real text instead of
+  #    "Loading…". Uses only the Node standard library, and always exits
+  #    0 — a flaky Sheet must never fail a deploy (it keeps the previous
+  #    markup instead).
+  command = "npx -y tinacms build; npx astro build && node build/deploy-astro.mjs; node build/generate.mjs"
 
   # The site is plain static HTML served from the repo root, so the repo root
   # is the publish directory.
@@ -72,6 +78,20 @@
   from = "/noticeboard.html"
   to = "/noticeboard/"
   status = 301
+  force = true
+
+# Tina visual editing island endpoint
+# ===================================
+# The bridge inside the published /expand-the-box/ page POSTs here to prime
+# the editor's form payloads and to re-render the editable region after
+# every save. The Astro build (@astrojs/netlify adapter) writes its
+# self-contained server function to .netlify/v1/functions/ssr/ and Netlify
+# deploys it in addition to the legacy netlify/functions/ dir. Only this
+# path is routed to it — every other URL stays served by static files.
+[[redirects]]
+  from = "/tina-island/*"
+  to = "/.netlify/functions/ssr"
+  status = 200
   force = true
 
 # NOTE: there is deliberately NO explicit redirect for the extensionless

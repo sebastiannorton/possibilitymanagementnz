@@ -1,0 +1,11 @@
+---
+// Heading block — optional eyebrow line above a h2/h3, inside .section-title.
+import { tinaField } from '@tinacms/astro/tina-field';
+interface Props { block: any }
+const { block } = Astro.props;
+const level = (block?.level === 'h3') ? 'h3' : 'h2';
+---
+<div class="section-title">
+    {block.eyebrow && <p data-tina-field={tinaField(block, 'eyebrow')}>{block.eyebrow}</p>}
+    <Fragment set:html={`<${level} data-tina-field="${tinaField(block, 'title')}">${block.title ?? ''}</${level}>`} />
+</div>

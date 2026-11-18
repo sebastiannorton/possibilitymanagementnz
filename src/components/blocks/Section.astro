@@ -1,0 +1,16 @@
+---
+// Section block — a heading with a rich-text body.
+import TinaMarkdown from '@tinacms/astro/TinaMarkdown.astro';
+import { tinaField } from '@tinacms/astro/tina-field';
+interface Props { block: any }
+const { block } = Astro.props;
+---
+<div class="etb-section">
+    <div class="section-title">
+        {block.eyebrow && <p data-tina-field={tinaField(block, 'eyebrow')}>{block.eyebrow}</p>}
+        <h3 data-tina-field={tinaField(block, 'heading')}>{block.heading}</h3>
+    </div>
+    <div data-tina-field={tinaField(block, 'paragraphs')}>
+        <TinaMarkdown content={block?.paragraphs} />
+    </div>
+</div>

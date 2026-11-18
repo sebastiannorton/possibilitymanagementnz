@@ -1,0 +1,32 @@
+---
+// The Expand the Box page. Data loaded through requestWithMetadata so
+// every block carries the _content_source metadata Tina's visual editor
+// uses to map clicks on the rendered page to fields in the sidebar.
+//
+// Static build: content is baked in at build time — visitors get plain
+// pre-rendered HTML, no Tina runtime shipped.
+// Edit mode: the EtbIsland wrapper lets the admin bridge swap this region
+// for the /tina-island/expandTheBox render after every save.
+export const prerender = true;
+
+import SiteShell from '../layouts/SiteShell.astro';
+import Blocks from '../components/Blocks.astro';
+import EtbIsland from '../components/EtbIsland.astro';
+import { requestWithMetadata } from '@tinacms/astro';
+import client from '../../tina/__generated__/client';
+
+const relativePath = 'index.json';
+const result = await requestWithMetadata(
+  client.queries.expandTheBox({ relativePath })
+);
+const doc = result.data.expandTheBox;
+---
+<SiteShell
+  title="Expand the Box 2027 - Possibility Management NZ"
+  description="Expand the Box 2027 — a Possibility Management core training. Dates, location and registration."
+  canonicalPath="/expand-the-box/"
+>
+    <EtbIsland name="expandTheBox" params={{ relativePath }} className="container" primary>
+        <Blocks doc={doc} />
+    </EtbIsland>
+</SiteShell>

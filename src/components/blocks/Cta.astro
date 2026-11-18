@@ -1,0 +1,17 @@
+---
+// Call-to-action block — a prominent registration button.
+import { tinaField } from '@tinacms/astro/tina-field';
+import { sanitizeHref } from '@tinacms/astro/sanitize';
+interface Props { block: any }
+const { block } = Astro.props;
+---
+<div class="etb-cta">
+    {block.text && <p class="etb-cta-text" data-tina-field={tinaField(block, 'text')}>{block.text}</p>}
+    <a
+        class="btn btn-primary"
+        href={sanitizeHref(block.url)}
+        data-tina-field={tinaField(block, 'url')}
+        target={block.external ? '_blank' : undefined}
+        rel={block.external ? 'noopener noreferrer' : undefined}
+    >{block.label}{block.external && <span class="external-icon">&#8599;</span>}</a>
+</div>

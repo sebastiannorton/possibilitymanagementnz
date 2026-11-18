@@ -1,0 +1,22 @@
+---
+// Link list block — heading plus link buttons.
+import { tinaField } from '@tinacms/astro/tina-field';
+import { sanitizeHref } from '@tinacms/astro/sanitize';
+interface Props { block: any }
+const { block } = Astro.props;
+const links = block?.links ?? [];
+---
+<div class="etb-links">
+    {block.heading && <h3 data-tina-field={tinaField(block, 'heading')}>{block.heading}</h3>}
+    <div class="etb-links-list">
+        {links.map((link, i) => (
+            <a
+                class="btn btn-outline"
+                href={sanitizeHref(link.url)}
+                data-tina-field={tinaField(block, 'links', i)}
+                target={link.external ? '_blank' : undefined}
+                rel={link.external ? 'noopener noreferrer' : undefined}
+            >{link.label}{link.external && <span class="external-icon">&#8599;</span>}</a>
+        ))}
+    </div>
+</div>

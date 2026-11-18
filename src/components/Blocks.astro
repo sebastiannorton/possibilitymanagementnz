@@ -1,0 +1,37 @@
+---
+// Blocks dispatcher — renders the page's ordered block list. Used by both
+// the static page build and the on-demand Tina island route, so what the
+// editor sees and what visitors get are rendered by the same components.
+import Heading from './blocks/Heading.astro';
+import Paragraph from './blocks/Paragraph.astro';
+import Image from './blocks/Image.astro';
+import Details from './blocks/Details.astro';
+import Section from './blocks/Section.astro';
+import LinkList from './blocks/LinkList.astro';
+import Cta from './blocks/Cta.astro';
+
+interface Props { doc: any }
+const { doc } = Astro.props;
+const blocks = doc?.blocks ?? [];
+
+// Blocks from the generated GraphQL client arrive keyed by __typename
+// (e.g. ExpandTheBoxBlocksLinkList); the local JSON file uses _template
+// (e.g. linkList). Support both.
+const templateOf = (block: any) => {
+    if (typeof block?._template === 'string') return block._template;
+    const typename = String(block?.__typename ?? '');
+    const stripped = typename.replace(/^ExpandTheBoxBlocks/, '');
+    return stripped ? stripped.charAt(0).toLowerCase() + stripped.slice(1) : '';
+};
+---
+{blocks.map((block) => {
+    const template = templateOf(block);
+    if (template === 'heading') return <Heading block={block} />;
+    if (template === 'paragraph') return <Paragraph block={block} />;
+    if (template === 'image') return <Image block={block} />;
+    if (template === 'details') return <Details block={block} />;
+    if (template === 'section') return <Section block={block} />;
+    if (template === 'linkList') return <LinkList block={block} />;
+    if (template === 'cta') return <Cta block={block} />;
+    return null;
+})}

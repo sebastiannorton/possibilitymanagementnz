@@ -5,14 +5,29 @@
   "description": "Possibility Management NZ website. Plain static HTML on Netlify, with Tina CMS editing the Expand the Box page.",
   "type": "module",
   "scripts": {
-    "build": "node build/generate.mjs",
-    "dev": "node build/generate.mjs && tinacms dev -c \"npx serve . -l 8080\"",
-    "build:tina": "tinacms build && node build/generate.mjs"
+    "build": "npx astro build && node build/deploy-astro.mjs && node build/generate.mjs",
+    "dev": "tinacms dev -c \"npx astro dev\"",
+    "build:tina": "tinacms build && npx astro build && node build/deploy-astro.mjs && node build/generate.mjs"
   },
   "dependencies": {
+    "@astrojs/netlify": "^8.2.14",
+    "@tinacms/astro": "^0.8.0",
+    "astro": "^7.4.13",
     "tinacms": "^3.15.2"
   },
   "devDependencies": {
     "@tinacms/cli": "^3.0.0"
+  },
+  "allowScripts": {
+    "better-sqlite3@12.11.1": true,
+    "core-js@3.51.0": true,
+    "esbuild@0.28.2": true,
+    "esbuild@0.25.12": true,
+    "fsevents@2.3.3": true
+  },
+  "overrides": {
+    "express": {
+      "cookie": "0.7.2"
+    }
   }
 }

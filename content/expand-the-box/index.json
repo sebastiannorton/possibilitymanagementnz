@@ -38,17 +38,7 @@
       "_template": "section",
       "eyebrow": "",
       "heading": "What to Expect",
-      "paragraphs": [
-        {
-          "type": "p",
-          "children": [
-            {
-              "type": "text",
-              "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam."
-            }
-          ]
-        }
-      ]
+      "paragraphs": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam."
     },
     {
       "_template": "cta",

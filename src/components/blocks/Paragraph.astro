@@ -1,0 +1,10 @@
+---
+// Paragraph block — rich text with inline formatting and links.
+import TinaMarkdown from '@tinacms/astro/TinaMarkdown.astro';
+import { tinaField } from '@tinacms/astro/tina-field';
+interface Props { block: any }
+const { block } = Astro.props;
+---
+<div class="etb-paragraph" data-tina-field={tinaField(block, 'content')}>
+    <TinaMarkdown content={block?.content} />
+</div>

@@ -1,0 +1,44 @@
+---
+// Local replacement for @tinacms/astro's <TinaIsland> wrapper.
+// ------------------------------------------------------------
+// Why this exists: the package renders its wrapper through a capitalized
+// dynamic component (`const Tag = wrapper.tag;` + `<Tag>`), which Astro
+// compiles as renderComponent-with-a-string and — on pages that nest the
+// island inside a layout with async component children — leaks a stray
+// "[object Object]" text node before the wrapper. We only ever need a
+// div.container wrapper, so the marker markup is hardcoded here. The
+// emitted attributes and bootstrap script are byte-identical to the
+// upstream component, which the admin bridge depends on:
+//   - data-tina-island="/tina-island/<name>?<params>"
+//   - data-tina-island-primary on the page's main region
+//   - the in-iframe /admin/bridge.js bootstrap (no-op for real visitors)
+interface Props {
+  name: string;
+  className?: string;
+  params?: Record<string, string | number>;
+  primary?: boolean;
+}
+const { name, className, params, primary } = Astro.props;
+const search = params
+  ? `?${new URLSearchParams(
+      Object.fromEntries(
+        Object.entries(params).map(([key, value]) => [key, String(value)])
+      )
+    ).toString()}`
+  : '';
+const marker = `/tina-island/${name}${search}`;
+const adminOrigin = import.meta.env?.PUBLIC_TINA_ADMIN_ORIGIN
+  ? String(import.meta.env.PUBLIC_TINA_ADMIN_ORIGIN)
+  : null;
+---
+<script is:inline type="module" define:vars={{ adminOrigin }}>
+  if (window.self !== window.top && !window.__tinaBootstrap) {
+    window.__tinaBootstrap = 1;
+    const { init, refreshForms } = await import('/admin/bridge.js');
+    init(adminOrigin ? { adminOrigin } : undefined);
+    document.addEventListener('astro:page-load', refreshForms);
+  }
+</script>
+<div class={className} data-tina-island={marker} data-tina-island-primary={primary ? '' : undefined}>
+    <slot />
+</div>

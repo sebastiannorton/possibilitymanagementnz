@@ -1,0 +1,24 @@
+---
+// Image block — a grey "IMAGE HERE" placeholder until an image is picked.
+import { tinaField } from '@tinacms/astro/tina-field';
+import { sanitizeImageSrc } from '@tinacms/astro/sanitize';
+interface Props { block: any }
+const { block } = Astro.props;
+const src = String(block?.src ?? '').trim();
+const safeSrc = src ? sanitizeImageSrc(src) : '';
+const external = /^https?:\/\//i.test(src) && !src.includes('possibilitymanagement.co.nz');
+---
+<div class="etb-figure">
+    {safeSrc ? (
+        <img
+            src={safeSrc}
+            alt={block.alt ?? ''}
+            data-tina-field={tinaField(block, 'src')}
+            loading="lazy"
+            decoding="async"
+        />
+    ) : (
+        <div class="etb-image-placeholder" role="img" aria-label={block.alt || 'IMAGE HERE'} data-tina-field={tinaField(block, 'src')}>IMAGE HERE</div>
+    )}
+    {block.caption && <p class="etb-caption" data-tina-field={tinaField(block, 'caption')}>{block.caption}</p>}
+</div>
