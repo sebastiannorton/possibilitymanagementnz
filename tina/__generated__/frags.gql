@@ -1,0 +1,46 @@
+fragment ExpandTheBoxParts on ExpandTheBox {
+  __typename
+  blocks {
+    __typename
+    ... on ExpandTheBoxBlocksHeading {
+      eyebrow
+      title
+      level
+    }
+    ... on ExpandTheBoxBlocksParagraph {
+      content
+    }
+    ... on ExpandTheBoxBlocksImage {
+      src
+      alt
+      caption
+    }
+    ... on ExpandTheBoxBlocksDetails {
+      rows {
+        __typename
+        label
+        value
+      }
+    }
+    ... on ExpandTheBoxBlocksSection {
+      eyebrow
+      heading
+      paragraphs
+    }
+    ... on ExpandTheBoxBlocksLinkList {
+      heading
+      links {
+        __typename
+        label
+        url
+        external
+      }
+    }
+    ... on ExpandTheBoxBlocksCta {
+      text
+      label
+      url
+      external
+    }
+  }
+}

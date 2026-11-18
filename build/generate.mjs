@@ -33,6 +33,8 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { renderExpandTheBoxPage } from './render-expand-the-box.mjs';
+
 import {
   parseEventRows,
   parsePossibilitatorRows,
@@ -485,6 +487,14 @@ async function main() {
   } catch (err) {
     warn(`Could not read netlify.toml (${err.message}). Nothing was pre-rendered.`);
     return;
+  }
+
+  // The Expand the Box page is pre-rendered from Tina CMS content JSON —
+  // no Sheets involved.
+  try {
+    await renderExpandTheBoxPage();
+  } catch (err) {
+    warn(`expand-the-box failed unexpectedly (${err.message}). Leaving it untouched.`);
   }
 
   // Rows parsed during the markup pass, reused by the structured-data pass.

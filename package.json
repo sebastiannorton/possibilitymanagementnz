@@ -1,0 +1,18 @@
+{
+  "name": "possibility-management-nz-website",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Possibility Management NZ website. Plain static HTML on Netlify, with Tina CMS editing the Expand the Box page.",
+  "type": "module",
+  "scripts": {
+    "build": "node build/generate.mjs",
+    "dev": "node build/generate.mjs && tinacms dev -c \"npx serve . -l 8080\"",
+    "build:tina": "tinacms build && node build/generate.mjs"
+  },
+  "dependencies": {
+    "tinacms": "^3.15.2"
+  },
+  "devDependencies": {
+    "@tinacms/cli": "^3.0.0"
+  }
+}

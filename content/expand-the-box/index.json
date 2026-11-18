@@ -1,0 +1,61 @@
+{
+  "blocks": [
+    {
+      "_template": "heading",
+      "eyebrow": "",
+      "title": "Expand the Box 2027",
+      "level": "h2"
+    },
+    {
+      "_template": "image",
+      "src": "",
+      "alt": "Expand the Box workshop",
+      "caption": ""
+    },
+    {
+      "_template": "details",
+      "rows": [
+        { "label": "DATE", "value": "[DATE HERE]" },
+        { "label": "TIME", "value": "[TIME HERE]" },
+        { "label": "LOCATION", "value": "[LOCATION HERE]" }
+      ]
+    },
+    {
+      "_template": "paragraph",
+      "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+    },
+    {
+      "_template": "paragraph",
+      "content": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+    },
+    {
+      "_template": "image",
+      "src": "",
+      "alt": "Expand the Box — placeholder image",
+      "caption": ""
+    },
+    {
+      "_template": "section",
+      "eyebrow": "",
+      "heading": "What to Expect",
+      "paragraphs": [
+        {
+          "type": "p",
+          "children": [
+            {
+              "type": "text",
+              "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_template": "cta",
+      "text": "Lorem ipsum — spaces are limited.",
+      "label": "Register Here",
+      "url": "[REGISTRATION LINK HERE]",
+      "external": true
+    }
+  ]
+}
