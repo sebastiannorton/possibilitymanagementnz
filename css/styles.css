@@ -1428,3 +1428,83 @@ footer {
         transition: none !important;
     }
 }
+
+/* ==========================================================
+   Expand the Box 2027 promo banner
+   ----------------------------------------------------------
+   Inserted right after the sticky <header> by js/main.js on
+   every page except /expand-the-box/ itself. Sits in normal
+   flow below the nav, so it scrolls off the screen naturally —
+   it disappears at roughly the same point the homepage hero
+   scrolls out of view. The text pans across on a marquee.
+   ========================================================== */
+.etb-banner {
+    display: block;
+    overflow: hidden;
+    background: var(--accent-primary);
+    color: #ffffff;
+    white-space: nowrap;
+    padding: 0.55rem 0;
+    z-index: 999;
+}
+
+.etb-banner:hover {
+    color: #ffffff;
+    filter: brightness(1.08);
+}
+
+/* Two copies of the text, spaced one banner-width apart by the JS-sized
+   .etb-banner-gap so the stream repeats seamlessly (see js/main.js). */
+.etb-banner-track {
+    display: inline-block;
+    white-space: nowrap;
+    will-change: transform;
+}
+
+.etb-banner-text {
+    display: inline-block;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.etb-banner-gap {
+    display: inline-block;
+}
+
+/* Featured Expand the Box event card (below the "What Box?" video).
+   Same card vocabulary as .event-card, presented larger. */
+.event-card--featured {
+    max-width: 52rem;
+    margin: 30px auto 0;
+    flex-direction: column;
+    padding: 35px;
+}
+
+.event-card--featured .event-card-image {
+    width: 100%;
+    height: 320px;
+    overflow: hidden;
+}
+
+.event-card--featured .event-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.event-card--featured .event-card-title {
+    font-size: 1.8rem;
+    margin-top: 0.5rem;
+}
+
+.event-card--featured .event-card-description,
+.event-card--featured .event-card-date,
+.event-card--featured .event-card-location {
+    font-size: 1.05rem;
+}
+
+@media (max-width: 768px) {
+    .event-card--featured { padding: 20px; }
+    .event-card--featured .event-card-image { height: 220px; }
+    .event-card--featured .event-card-title { font-size: 1.4rem; }
+}

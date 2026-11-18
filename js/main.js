@@ -115,11 +115,89 @@ const scrollAnimations = () => {
     });
 };
 
+// Expand the Box 2027 promo banner
+// -------------------------------
+// A marquee ribbon linking to /expand-the-box/. Injected right after
+// the sticky <header> on every page except /expand-the-box/ itself. It sits
+// in normal document flow, so it simply scrolls off the screen with the
+// page — disappearing at about the point the homepage hero leaves the
+// viewport. Markup + styles live in css/styles.css (.etb-banner).
+//
+// One single text stream: the first copy starts centred on page load, pans
+// constantly left, and the next copy enters at the right edge at the exact
+// moment the first letter leaves through the left edge — no blank period,
+// seamless forever. Doubling the text with a spacer (rather than jumping a
+// single copy) is what makes the handover seamless: the two copies are
+// always exactly one banner-width apart, so when the lead letter is at the
+// left edge the trailing copy's first letter is precisely at the right edge.
+// The spacer that maintains that spacing depends on the rendered banner and
+// text width, so it is set in JS and refreshed on resize.
+const etbBanner = () => {
+    if (window.location.pathname.indexOf('/expand-the-box') === 0) return;
+
+    const header = document.querySelector('header');
+    if (!header) return;
+
+    const MESSAGE = 'Expand the Box 2027! Click here for more information and registration.';
+
+    const banner = document.createElement('a');
+    banner.className = 'etb-banner';
+    banner.href = '/expand-the-box/';
+    banner.setAttribute('aria-label', MESSAGE);
+    banner.innerHTML =
+        '<span class="etb-banner-track">' +
+        `<span class="etb-banner-text">${MESSAGE}</span>` +
+        '<span class="etb-banner-gap" aria-hidden="true"></span>' +
+        `<span class="etb-banner-text" aria-hidden="true">${MESSAGE}</span>` +
+        '</span>';
+
+    header.parentNode.insertBefore(banner, header.nextSibling);
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const track = banner.firstElementChild;
+    const copy = track.firstElementChild;
+    const gap = copy.nextElementSibling;
+
+    // Size the spacer so the copies sit exactly one banner-width apart,
+    // measured from the first letter of copy one to the first letter of
+    // copy two. Re-measure on resize (fonts/layout can reflow the widths).
+    const resizeSpacers = () => {
+        gap.style.width = `${Math.max(0, banner.offsetWidth - copy.offsetWidth)}px`;
+    };
+    resizeSpacers();
+    window.addEventListener('resize', resizeSpacers);
+
+    const speed = 90; // px per second, a slow readable roll
+    let lastTime = performance.now();
+    let x = (banner.offsetWidth - copy.offsetWidth) / 2; // centred on load
+
+    const pan = (now) => {
+        let delta = now - lastTime;
+        lastTime = now;
+        // The tab can suspend rAF (hidden tab, breakpoint in the debugger);
+        // cap the step so returning to the tab doesn't teleport the text.
+        if (delta > 250) delta = 0;
+
+        x -= speed * delta / 1000;
+        // First letter fully past the left edge → advance by exactly one
+        // banner width. The trailing copy was spaced so its first letter is
+        // then precisely at the right edge; the cycle repeats seamlessly.
+        if (x <= -copy.offsetWidth) {
+            x += copy.offsetWidth + gap.offsetWidth;
+        }
+        track.style.transform = `translateX(${Math.round(x * 100) / 100}px)`;
+        requestAnimationFrame(pan);
+    };
+    requestAnimationFrame(pan);
+};
+
 const app = () => {
     navSlide();
     mobileDropdown();
     heroFade();
     scrollAnimations();
+    etbBanner();
 }
 
 app();
