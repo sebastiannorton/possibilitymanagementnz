@@ -18,6 +18,19 @@ var config_default = defineConfig({
       mediaRoot: "Images"
     }
   },
+  // The Preview button in the Tina admin opens the live branch deploy of the
+  // site, so editors see the real page next to the sidebar and know which
+  // fields drive which sections. Netlify branch deploy URLs follow
+  // <branch>--<site>.netlify.app; set TINA_PREVIEW_SITE below (or in the
+  // deploy environment) to this site's Netlify subdomain name.
+  ui: {
+    previewUrl: (context) => {
+      const branch = context.branch || process.env.NEXT_PUBLIC_TINA_BRANCH || "";
+      const site = process.env.TINA_PREVIEW_SITE || "";
+      const slugified = branch.toLowerCase().replace(/[^a-z0-9-]/g, "-");
+      return { url: site ? `https://${slugified}--${site}.netlify.app/expand-the-box/` : "/" };
+    }
+  },
   schema: {
     collections: [
       {
@@ -30,7 +43,10 @@ var config_default = defineConfig({
           defaultItem: () => ({}),
           filename: {
             readonly: true
-          }
+          },
+          // "View page" opens the published page from the admin — one click
+          // from the field list to the rendered result.
+          router: () => "/expand-the-box/"
         },
         fields: [
           {
