@@ -1,51 +1,60 @@
 {
   "blocks": [
     {
-      "_template": "heading",
       "eyebrow": "",
-      "title": "Expand the Box 2027",
-      "level": "h2"
+      "title": "Expand the Box North Island",
+      "level": "h2",
+      "_template": "heading"
     },
     {
-      "_template": "image",
       "src": "",
       "alt": "Expand the Box workshop",
-      "caption": ""
+      "caption": "",
+      "_template": "image"
     },
     {
-      "_template": "details",
       "rows": [
-        { "label": "DATE", "value": "[DATE HERE]" },
-        { "label": "TIME", "value": "[TIME HERE]" },
-        { "label": "LOCATION", "value": "[LOCATION HERE]" }
-      ]
+        {
+          "label": "DATE",
+          "value": "[DATE HERE]"
+        },
+        {
+          "label": "TIME",
+          "value": "[TIME HERE]"
+        },
+        {
+          "label": "LOCATION",
+          "value": "[LOCATION HERE]"
+        }
+      ],
+      "_template": "details"
     },
     {
-      "_template": "paragraph",
-      "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+      "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n",
+      "_template": "paragraph"
     },
     {
-      "_template": "paragraph",
-      "content": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+      "content": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n",
+      "_template": "paragraph"
     },
     {
-      "_template": "image",
       "src": "",
       "alt": "Expand the Box — placeholder image",
-      "caption": ""
+      "caption": "",
+      "_template": "image"
     },
     {
-      "_template": "section",
       "eyebrow": "",
       "heading": "What to Expect",
-      "paragraphs": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam."
+      "paragraphs": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam.\n",
+      "_template": "section"
     },
     {
-      "_template": "cta",
       "text": "Lorem ipsum — spaces are limited.",
       "label": "Register Here",
       "url": "[REGISTRATION LINK HERE]",
-      "external": true
+      "external": true,
+      "_template": "cta"
     }
   ]
 }
